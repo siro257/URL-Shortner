@@ -4,10 +4,11 @@ import styles from '../styles/Home.module.css';
 import { AiOutlineClose } from 'react-icons/ai';
 
 const Home: NextPage = () => {
-  const [url, setUrl] = useState('');
-  const [slug, setSlug] = useState('');
-  const [err, setErr] = useState(false);
-  const [created, setCreated] = useState(false);
+  const [url, setUrl] = useState<string>();
+  const [slug, setSlug] = useState<string>();
+  const [err, setErr] = useState<boolean>();
+  const [errMsg, setErrMsg] = useState<string>();
+  const [created, setCreated] = useState<boolean>();
 
   const urlRef = useRef<HTMLInputElement>(null);
   const slugRef = useRef<HTMLInputElement>(null);
@@ -25,12 +26,10 @@ const Home: NextPage = () => {
     });
 
     const data = await res.json();
-    console.log(res);
-
-    console.log(data);
     if (res.status === 409) {
       setErr(true);
       setCreated(false);
+      setErrMsg(data.error);
     } else if (res.status === 201) {
       setCreated(true);
       setErr(false);
@@ -71,20 +70,20 @@ const Home: NextPage = () => {
 
         {err && !created && (
           <div className={styles.errAlertBox}>
-            <span>Error has occurred</span>
+            <span>{errMsg}</span>
             <AiOutlineClose
               onClick={() => setErr(false)}
-              style={{ position: 'absolute', right: '28%', fontSize: '1.25em', cursor: 'pointer' }}
+              style={{ position: 'absolute', right: '30%', fontSize: '1.25em', cursor: 'pointer' }}
             />
           </div>
         )}
 
         {created && !err && (
           <div className={styles.successAlertBox}>
-            <span>created with slug {slug}</span>
+            <a href={`http://localhost:3000/${slug}`}>{`http://localhost:3000/${slug}`}</a>
             <AiOutlineClose
               onClick={() => setCreated(false)}
-              style={{ position: 'absolute', right: '28%', fontSize: '1.25em', cursor: 'pointer' }}
+              style={{ position: 'absolute', right: '30%', fontSize: '1.25em', cursor: 'pointer' }}
             />
           </div>
         )}
