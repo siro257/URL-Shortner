@@ -9,30 +9,34 @@ const Home: NextPage = () => {
   const [err, setErr] = useState(false);
   const [created, setCreated] = useState(false);
 
-  // TODO: validate the inputs
-  // slugs shouldn't be empty
-  // // randomly generate slug when empty
-  // slugs shouldn't be the same (this should be handled by backend)
+  const urlRef = useRef<HTMLInputElement>(null);
+  const slugRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    fetch('http://localhost:3000/api/create-url', {
+    const res = await fetch('http://localhost:3000/api/create-url', {
       method: 'POST',
       headers: new Headers({
         Accept: 'application/json',
         'Content-Type': 'application/json',
       }),
-      body: JSON.stringify({ url: url, slug: slug }),
-    }).then((res) => {
-      if (res.status === 409) {
-        setErr(true);
-        setCreated(false);
-      } else if (res.status === 201) {
-        setCreated(true);
-        setErr(false);
-      }
+      body: JSON.stringify({ url: urlRef.current?.value, slug: slugRef.current?.value }),
     });
+
+    const data = await res.json();
+    console.log(res);
+
+    console.log(data);
+    if (res.status === 409) {
+      setErr(true);
+      setCreated(false);
+    } else if (res.status === 201) {
+      setCreated(true);
+      setErr(false);
+      setUrl(data.url);
+      setSlug(data.slug);
+    }
   };
 
   return (
@@ -47,10 +51,7 @@ const Home: NextPage = () => {
             type='text'
             id='url'
             className={styles.input}
-            value={url}
-            onChange={(e) => {
-              setUrl(e.target.value);
-            }}
+            ref={urlRef}
             placeholder='Shorten your link'
           />
           <label className={styles.label} htmlFor='slug'>
@@ -60,10 +61,7 @@ const Home: NextPage = () => {
             type='text'
             id='slug'
             className={styles.input}
-            value={slug}
-            onChange={(e) => {
-              setSlug(e.target.value);
-            }}
+            ref={slugRef}
             placeholder='random if empty'
           />
           <button type='submit' className={styles.formButton}>
@@ -73,7 +71,7 @@ const Home: NextPage = () => {
 
         {err && !created && (
           <div className={styles.errAlertBox}>
-            <span>err</span>
+            <span>Error has occurred</span>
             <AiOutlineClose
               onClick={() => setErr(false)}
               style={{ position: 'absolute', right: '28%', fontSize: '1.25em', cursor: 'pointer' }}

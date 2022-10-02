@@ -1,10 +1,20 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '../../db/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import * as crypto from 'crypto';
+
+const makeSlug = (length: number) => {
+  const slug = crypto.randomBytes(length).toString('hex');
+
+  return slug;
+};
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const { url, slug } = req.body;
+  let { url, slug } = req.body;
+  if (!slug) {
+    slug = makeSlug(3);
+  }
   try {
     await prisma.shortLink.create({
       data: {
